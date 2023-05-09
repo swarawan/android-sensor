@@ -16,8 +16,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private val menu = listOf(
-        MenuItem("All Sensors", SensorDiscovery::class.java),
-        MenuItem("Sensor Listener", SensorListener::class.java),
+        MenuItem("All Sensors", SensorDiscoveryActivity::class.java),
+        MenuItem("Sensor Listener", SensorListenerActivity::class.java),
+        MenuItem("Tilt Spot", SensorListenerActivity::class.java),
     )
 
     private fun goTo(targetClass: Class<*>) {

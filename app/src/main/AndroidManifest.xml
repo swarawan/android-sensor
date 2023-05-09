@@ -20,8 +20,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".SensorDiscovery" />
-        <activity android:name=".SensorListener" />
+        <activity android:name=".SensorDiscoveryActivity" />
+        <activity android:name=".SensorListenerActivity" />
     </application>
 
 </manifest>

@@ -4,4 +4,9 @@
     <string name="label_proximity">Proximity Sensor: %1$.2f</string>
     <string name="label_light">Light Sensor: %1$.2f</string>
     <string name="error_no_sensor">No sensor</string>
+    <string name="azimuth">Azimuth</string>
+    <string name="value_format">: %1$.2f</string>
+    <string name="pitch">Pitch</string>
+    <string name="roll">Roll</string>
+    <string name="gravity">Gravity</string>
 </resources>
