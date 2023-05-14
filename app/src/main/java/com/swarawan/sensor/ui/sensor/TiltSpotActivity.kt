@@ -1,14 +1,30 @@
-package com.swarawan.sensor
+package com.swarawan.sensor.ui.sensor
 
+import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorManager
 import android.view.Surface
-import com.swarawan.sensor.base.SensorActivity
+import android.widget.Toast
+import com.google.gson.Gson
+import com.swarawan.sensor.R
+import com.swarawan.sensor.base.activity.SensorActivity
+import com.swarawan.sensor.base.exstorage.ExternalStorageUtils
+import com.swarawan.sensor.base.permission.PermissionGroup
+import com.swarawan.sensor.base.permission.PermissionUtils
+import com.swarawan.sensor.data.StepText
+import com.swarawan.sensor.data.TiltText
 import com.swarawan.sensor.databinding.ActivityTiltSpotBinding
+import com.swarawan.sensor.ui.main.MainActivity
 import kotlin.math.abs
+import kotlin.math.round
 
 class TiltSpotActivity : SensorActivity() {
+
+    companion object {
+        private const val FILENAME = "tilt-spot.txt"
+        private const val VALUE_DRIFT = 0.05f
+    }
 
     private val bindView: ActivityTiltSpotBinding by lazy {
         ActivityTiltSpotBinding.inflate(layoutInflater)
@@ -16,13 +32,19 @@ class TiltSpotActivity : SensorActivity() {
 
     private var accelerometerData = FloatArray(3)
     private var magnetometerData = FloatArray(3)
-
-    companion object {
-        private const val VALUE_DRIFT = 0.05f
-    }
+    private var dataRecord = FloatArray(3)
 
     override fun onCreateView() {
         setContentView(bindView.root)
+        setSupportActionBar(bindView.toolbarLayout.toolbar)
+        supportActionBar?.let {
+            it.setDisplayHomeAsUpEnabled(true)
+            it.title = intent?.getStringExtra(MainActivity.INTENT_TITLE)
+        }
+
+        bindView.buttonRecord.setOnClickListener {
+            verifyPermissionToFileRecording()
+        }
     }
 
     override fun onStartSensor() {
@@ -41,8 +63,8 @@ class TiltSpotActivity : SensorActivity() {
             Sensor.TYPE_MAGNETIC_FIELD -> magnetometerData = event.values.clone()
         }
 
-        val orientationValue = getDisplayOrientation()
-        renderDisplay(orientationValue)
+        dataRecord = getDisplayOrientation()
+        renderDisplay()
     }
 
     private fun getDisplayOrientation(): FloatArray {
@@ -60,21 +82,27 @@ class TiltSpotActivity : SensorActivity() {
             Surface.ROTATION_90 -> {
                 SensorManager.remapCoordinateSystem(
                     rotationMatrix,
-                    SensorManager.AXIS_Y, SensorManager.AXIS_MINUS_X, rotationMatrixAdjusted
+                    SensorManager.AXIS_Y,
+                    SensorManager.AXIS_MINUS_X,
+                    rotationMatrixAdjusted
                 )
             }
 
             Surface.ROTATION_180 -> {
                 SensorManager.remapCoordinateSystem(
                     rotationMatrix,
-                    SensorManager.AXIS_MINUS_X, SensorManager.AXIS_MINUS_Y, rotationMatrixAdjusted
+                    SensorManager.AXIS_MINUS_X,
+                    SensorManager.AXIS_MINUS_Y,
+                    rotationMatrixAdjusted
                 )
             }
 
             Surface.ROTATION_270 -> {
                 SensorManager.remapCoordinateSystem(
                     rotationMatrix,
-                    SensorManager.AXIS_MINUS_Y, SensorManager.AXIS_X, rotationMatrixAdjusted
+                    SensorManager.AXIS_MINUS_Y,
+                    SensorManager.AXIS_X,
+                    rotationMatrixAdjusted
                 )
             }
         }
@@ -86,10 +114,10 @@ class TiltSpotActivity : SensorActivity() {
         return orientationValue
     }
 
-    private fun renderDisplay(orientationValue: FloatArray) {
-        val azimuthValue = orientationValue[0]
-        var pitchValue = orientationValue[1]
-        var rollValue = orientationValue[2]
+    private fun renderDisplay() {
+        val azimuthValue = dataRecord[0]
+        var pitchValue = dataRecord[1]
+        var rollValue = dataRecord[2]
 
         if (abs(pitchValue) < VALUE_DRIFT) {
             pitchValue = 0f
@@ -117,6 +145,42 @@ class TiltSpotActivity : SensorActivity() {
                 rollValue > 0f -> spotLeft.alpha = pitchValue
                 else -> spotRight.alpha = abs(pitchValue)
             }
+        }
+    }
+
+    private fun verifyPermissionToFileRecording() {
+        if (permissionUtils.verifyPermissions(PermissionGroup.EXTERNAL_STORAGE)) {
+            recordToFile()
+        }
+    }
+
+    private fun recordToFile() {
+        val tiltText = TiltText(
+            azimuth = dataRecord[0],
+            pitch = dataRecord[0],
+            roll = dataRecord[0],
+        )
+        val fileCreated = externalStorageUtils.createFile(FILENAME, Gson().toJson(tiltText))
+        if (fileCreated) {
+            Toast.makeText(this, "File created", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when {
+            grantResults.isNotEmpty() && grantResults.first() == PackageManager.PERMISSION_GRANTED ->
+                verifyPermissionToFileRecording()
+
+            else -> Toast.makeText(
+                this,
+                "Change permission manually in Application Settings",
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 

@@ -1,16 +1,13 @@
-package com.swarawan.sensor
+package com.swarawan.sensor.ui.sensor
 
-import android.content.Context
-import android.hardware.Sensor
 import android.hardware.SensorEvent
-import android.hardware.SensorManager
-import android.os.Bundle
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.swarawan.sensor.R
 import com.swarawan.sensor.adapter.RVAdapter
-import com.swarawan.sensor.base.SensorActivity
+import com.swarawan.sensor.base.activity.SensorActivity
 import com.swarawan.sensor.databinding.ActivityRvBinding
+import com.swarawan.sensor.ui.main.MainActivity
 
 class SensorDiscoveryActivity : SensorActivity() {
 
@@ -31,9 +28,17 @@ class SensorDiscoveryActivity : SensorActivity() {
                 view.findViewById<TextView>(R.id.sensor_item).text = data.name
             })
 
-        bindView.recyclerView.apply {
-            adapter = rvAdapter
-            layoutManager = linearLayoutManager
+        with(bindView) {
+            setSupportActionBar(toolbarLayout.toolbar)
+            supportActionBar?.let {
+                it.setDisplayHomeAsUpEnabled(true)
+                it.title = intent?.getStringExtra(MainActivity.INTENT_TITLE)
+            }
+
+            recyclerView.apply {
+                adapter = rvAdapter
+                layoutManager = linearLayoutManager
+            }
         }
     }
 

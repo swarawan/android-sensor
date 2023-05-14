@@ -1,4 +1,4 @@
-package com.swarawan.sensor.base
+package com.swarawan.sensor.base.activity
 
 import android.content.Context
 import android.hardware.Sensor
@@ -10,6 +10,9 @@ import android.os.Bundle
 import android.view.Display
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
+import com.swarawan.sensor.base.exstorage.ExternalStorageUtils
+import com.swarawan.sensor.base.permission.PermissionGroup
+import com.swarawan.sensor.base.permission.PermissionUtils
 
 abstract class SensorActivity : AppCompatActivity(), SensorEventListener {
 
@@ -20,7 +23,13 @@ abstract class SensorActivity : AppCompatActivity(), SensorEventListener {
     var sensorProximity: Sensor? = null
     var sensorAccelerometer: Sensor? = null
     var sensorMagnetometer: Sensor? = null
+    var sensorGravity: Sensor? = null
+    var sensorGameRotation: Sensor? = null
+    var sensorStepCounter: Sensor? = null
     var activityDisplay: Display? = null
+
+    lateinit var permissionUtils: PermissionUtils
+    lateinit var externalStorageUtils: ExternalStorageUtils
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,12 +41,18 @@ abstract class SensorActivity : AppCompatActivity(), SensorEventListener {
             sensorProximity = it.getDefaultSensor(Sensor.TYPE_PROXIMITY)
             sensorAccelerometer = it.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
             sensorMagnetometer = it.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
+            sensorGravity = it.getDefaultSensor(Sensor.TYPE_GRAVITY)
+            sensorGameRotation = it.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR)
+            sensorStepCounter = it.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
         }
 
         activityDisplay = when {
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> display
             else -> (getSystemService(WINDOW_SERVICE) as WindowManager).defaultDisplay
         }
+
+        permissionUtils = PermissionUtils(this)
+        externalStorageUtils = ExternalStorageUtils(this)
 
         onCreateView()
     }
@@ -50,6 +65,11 @@ abstract class SensorActivity : AppCompatActivity(), SensorEventListener {
     override fun onStop() {
         super.onStop()
         sensorManager?.unregisterListener(this)
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        onBackPressedDispatcher.onBackPressed()
+        return true
     }
 
     override fun onSensorChanged(event: SensorEvent?) {

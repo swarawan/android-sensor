@@ -1,11 +1,12 @@
-package com.swarawan.sensor
+package com.swarawan.sensor.ui.sensor
 
 import android.hardware.Sensor
 import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import com.swarawan.sensor.base.SensorActivity
+import com.swarawan.sensor.R
+import com.swarawan.sensor.base.activity.SensorActivity
 import com.swarawan.sensor.databinding.ActivitySensorListenerBinding
+import com.swarawan.sensor.ui.main.MainActivity
 
 class SensorListenerActivity : SensorActivity() {
 
@@ -15,6 +16,11 @@ class SensorListenerActivity : SensorActivity() {
 
     override fun onCreateView() {
         setContentView(bindView.root)
+        setSupportActionBar(bindView.toolbarLayout.toolbar)
+        supportActionBar?.let {
+            it.setDisplayHomeAsUpEnabled(true)
+            it.title = intent?.getStringExtra(MainActivity.INTENT_TITLE)
+        }
 
         sensorLight?.let {
             bindView.sensorLight.text = getString(R.string.error_no_sensor)
