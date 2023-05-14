@@ -24,7 +24,7 @@ class StepActivity : SensorActivity() {
         ActivityStepDetectorBinding.inflate(layoutInflater)
     }
 
-    private var stepRecorded = 0
+    private var stepRecorded = 32
     override fun onCreateView() {
         setContentView(bindView.root)
         setSupportActionBar(bindView.toolbarLayout.toolbar)

@@ -23,8 +23,6 @@ abstract class SensorActivity : AppCompatActivity(), SensorEventListener {
     var sensorProximity: Sensor? = null
     var sensorAccelerometer: Sensor? = null
     var sensorMagnetometer: Sensor? = null
-    var sensorGravity: Sensor? = null
-    var sensorGameRotation: Sensor? = null
     var sensorStepCounter: Sensor? = null
     var activityDisplay: Display? = null
 
@@ -41,8 +39,6 @@ abstract class SensorActivity : AppCompatActivity(), SensorEventListener {
             sensorProximity = it.getDefaultSensor(Sensor.TYPE_PROXIMITY)
             sensorAccelerometer = it.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
             sensorMagnetometer = it.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
-            sensorGravity = it.getDefaultSensor(Sensor.TYPE_GRAVITY)
-            sensorGameRotation = it.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR)
             sensorStepCounter = it.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
         }
 
